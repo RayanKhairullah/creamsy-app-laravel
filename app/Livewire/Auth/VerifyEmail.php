@@ -17,8 +17,7 @@ class VerifyEmail extends Component
     public function sendVerification(): void
     {
         if (Auth::user()->hasVerifiedEmail()) {
-            return redirect()->route('home');
-
+            $this->redirect(route('home'));
             return;
         }
 

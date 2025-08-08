@@ -48,7 +48,7 @@
             @endif
         </x-table.cell>
         <x-table.cell>{{ $product->name }}</x-table.cell>
-        <x-table.cell>{{ $product->category }}</x-table.cell>
+        <x-table.cell>{{ $categories[$product->category] ?? ucfirst($product->category) }}</x-table.cell>
         <x-table.cell>Rp {{ number_format($product->price, 0, ',', '.') }}</x-table.cell>
         <x-table.cell>{{ $product->is_active ? 'Active' : 'Inactive' }}</x-table.cell>
         <x-table.cell class="flex gap-2">

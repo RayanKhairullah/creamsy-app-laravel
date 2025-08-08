@@ -14,7 +14,7 @@ class Receipt extends Component
     public function mount(Transaction $transaction)
     {
         $this->transaction = $transaction;
-        $this->items = TransactionItem::where('transaction_id', $transaction->id)->get();
+        $this->items = TransactionItem::with('product')->where('transaction_id', $transaction->id)->get();
     }
 
     public function render()

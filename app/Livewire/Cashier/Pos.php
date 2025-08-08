@@ -5,134 +5,260 @@ namespace App\Livewire\Cashier;
 use Livewire\Component;
 use App\Models\Product;
 use App\Models\Discount;
+use App\Models\PaymentMethod;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
-use App\Models\PaymentMethod;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Livewire\WithPagination;
+use Jantinnerezo\LivewireAlert\LivewireAlert;
 
 class Pos extends Component
 {
-    public $products = [], $cart = [], $discounts = [], $paymentMethods = [], $selectedDiscount = null, $selectedPayment = null;
-    public $customerName, $amountPaid, $change, $subtotal, $total, $discountAmount;
+    use WithPagination, LivewireAlert;
+    
+    public $cart = [];
 
+    public $discounts;
+    public $paymentMethods;
+    public $searchQuery = '';
+    public $selectedDiscount = null;
+    public $paymentMethod = null;
+    public $paidAmount = 0;
+    public $perPage = 12;
+    
+    protected $listeners = ['productSelected' => 'addToCart'];
+    
     public function mount()
     {
-        $this->products = Product::where('is_active', 1)->get();
-        $this->discounts = Discount::where('is_active', 1)->get();
-        $this->paymentMethods = PaymentMethod::where('is_active', 1)->get();
-        $this->cart = [];
-        $this->subtotal = 0;
-        $this->total = 0;
-        $this->discountAmount = 0;
+        $this->loadData();
     }
-
-    public function addToCart($productId, $quantity = 1, $variations = [])
+    
+    public function loadData()
     {
-        $product = Product::find($productId);
-        if (!$product) return;
-        $found = false;
-        foreach ($this->cart as &$item) {
-            if ($item['product_id'] === $productId && $item['variations'] == $variations) {
-                $item['quantity'] += $quantity;
-                $found = true;
-                break;
-            }
+
+            
+        $this->discounts = Discount::where('is_active', 1)
+            ->whereDate('start_date', '<=', now())
+            ->whereDate('end_date', '>=', now())
+            ->get();
+            
+        $this->paymentMethods = PaymentMethod::where('is_active', 1)->get();
+    }
+    
+    public function addToCart($productId)
+    {
+        $product = Product::findOrFail($productId);
+        
+        if ($product->stock_quantity <= 0) {
+            $this->alert('error', 'Product is out of stock!');
+            return;
         }
-        if (!$found) {
-            $this->cart[] = [
-                'product_id' => $productId,
+        
+        if (isset($this->cart[$productId])) {
+            $this->cart[$productId]['quantity']++;
+        } else {
+            $this->cart[$productId] = [
+                'id' => $product->id,
                 'name' => $product->name,
-                'category' => $product->category,
                 'price' => $product->price,
-                'quantity' => $quantity,
-                'variations' => $variations,
+                'quantity' => 1,
+                'subtotal' => $product->price
             ];
         }
-        $this->calculateTotals();
+        
+        $this->calculateSubtotal($productId);
+        $this->searchQuery = '';
+        $this->resetPage();
+        
+        $this->dispatch('product-added', name: $product->name);
     }
-
-    public function removeFromCart($index)
+    
+    public function removeFromCart($productId)
     {
-        array_splice($this->cart, $index, 1);
-        $this->calculateTotals();
+        unset($this->cart[$productId]);
+        $this->dispatch('product-removed');
     }
-
-    public function applyDiscount($discountId)
+    
+    public function updateQuantity($productId, $quantity)
     {
-        $discount = Discount::find($discountId);
-        $this->selectedDiscount = $discount;
-        $this->calculateTotals();
-    }
-
-    public function selectPayment($paymentId)
-    {
-        $this->selectedPayment = PaymentMethod::find($paymentId);
-    }
-
-    public function calculateTotals()
-    {
-        $this->subtotal = collect($this->cart)->sum(function ($item) {
-            return $item['price'] * $item['quantity'];
-        });
-        $this->discountAmount = 0;
-        // Ensure selectedDiscount is always a Discount object
-        if ($this->selectedDiscount && is_string($this->selectedDiscount)) {
-            $this->selectedDiscount = \App\Models\Discount::find($this->selectedDiscount);
+        if ($quantity <= 0) {
+            $this->removeFromCart($productId);
+            return;
         }
-        if ($this->selectedDiscount) {
-            if ($this->subtotal >= $this->selectedDiscount->minimum_purchase) {
-                if ($this->selectedDiscount->type === 'percentage') {
-                    $this->discountAmount = $this->subtotal * ($this->selectedDiscount->value / 100);
-                    if ($this->selectedDiscount->maximum_discount) {
-                        $this->discountAmount = min($this->discountAmount, $this->selectedDiscount->maximum_discount);
-                    }
-                } else {
-                    $this->discountAmount = $this->selectedDiscount->value;
-                }
+        
+        $product = Product::findOrFail($productId);
+        if ($quantity > $product->stock_quantity) {
+            $this->alert('error', 'Not enough stock available!');
+            return;
+        }
+        
+        $this->cart[$productId]['quantity'] = $quantity;
+        $this->calculateSubtotal($productId);
+    }
+    
+    protected function calculateSubtotal($productId)
+    {
+        $this->cart[$productId]['subtotal'] = 
+            $this->cart[$productId]['price'] * $this->cart[$productId]['quantity'];
+    }
+    
+    public function applyDiscount($discountId = null)
+    {
+        if (empty($discountId)) {
+            $this->selectedDiscount = null;
+            return;
+        }
+        
+        // If it's already a Discount model, use it directly
+        if ($discountId instanceof \App\Models\Discount) {
+            $this->selectedDiscount = $discountId;
+            return;
+        }
+        
+        // If it's a numeric ID, find the discount
+        if (is_numeric($discountId)) {
+            $this->selectedDiscount = Discount::find($discountId);
+            return;
+        }
+        
+        // If it's a string that can be cast to int, try to find the discount
+        if (is_string($discountId) && ctype_digit($discountId)) {
+            $this->selectedDiscount = Discount::find((int)$discountId);
+            return;
+        }
+        
+        // If we get here, set to null to be safe
+        $this->selectedDiscount = null;
+    }
+    
+    public function getSubtotalProperty()
+    {
+        return array_sum(array_column($this->cart, 'subtotal'));
+    }
+    
+    public function getDiscountAmountProperty()
+    {
+        if (!$this->selectedDiscount || !$this->selectedDiscount instanceof \App\Models\Discount) {
+            return 0;
+        }
+        
+        if ($this->subtotal <= $this->selectedDiscount->minimum_purchase) {
+            return 0;
+        }
+        
+        $discountAmount = 0;
+        if ($this->selectedDiscount->type === 'percentage') {
+            $discountAmount = $this->subtotal * ($this->selectedDiscount->value / 100);
+            if (isset($this->selectedDiscount->maximum_discount) && $discountAmount > $this->selectedDiscount->maximum_discount) {
+                $discountAmount = $this->selectedDiscount->maximum_discount;
             }
+        } else {
+            $discountAmount = $this->selectedDiscount->value;
         }
-        $this->total = max($this->subtotal - $this->discountAmount, 0);
+        
+        return $discountAmount;
     }
-
+    
+    public function getTotalProperty()
+    {
+        return $this->subtotal - $this->discountAmount;
+    }
+    
+    public function getChangeProperty()
+    {
+        return max(0, $this->paidAmount - $this->total);
+    }
+    
     public function processPayment()
     {
         $this->validate([
-            'amountPaid' => 'required|numeric|min:' . $this->total,
-            'selectedPayment' => 'required',
+            'paymentMethod' => 'required|exists:payment_methods,id',
+            'paidAmount' => 'required|numeric|min:'.$this->total
         ]);
-        // Ensure selectedPayment is always a PaymentMethod object
-        if ($this->selectedPayment && is_string($this->selectedPayment)) {
-            $this->selectedPayment = \App\Models\PaymentMethod::find($this->selectedPayment);
-        }
+        
+        // Create transaction
         $transaction = Transaction::create([
-            'transaction_number' => strtoupper(Str::random(10)),
+            'transaction_number' => 'TRX-' . now()->format('Ymd') . '-' . Str::random(6),
             'cashier_id' => auth()->id(),
             'subtotal' => $this->subtotal,
             'discount_amount' => $this->discountAmount,
             'total_amount' => $this->total,
-            'payment_method' => $this->selectedPayment->code,
-            'paid_amount' => $this->amountPaid,
-            'change_amount' => $this->amountPaid - $this->total,
+            'payment_method' => $this->paymentMethod,
+            'paid_amount' => $this->paidAmount,
+            'change_amount' => $this->change,
             'status' => 'completed',
             'transaction_date' => now(),
         ]);
+        
+        // Create transaction items and update stock
         foreach ($this->cart as $item) {
             TransactionItem::create([
                 'transaction_id' => $transaction->id,
-                'product_id' => $item['product_id'],
+                'product_id' => $item['id'],
                 'quantity' => $item['quantity'],
                 'unit_price' => $item['price'],
-                'total_price' => $item['price'] * $item['quantity'],
-                'variations' => json_encode($item['variations']),
+                'total_price' => $item['subtotal'],
             ]);
+            
+            // Update product stock
+            $product = Product::find($item['id']);
+            $product->decrement('stock_quantity', $item['quantity']);
         }
-        $this->change = $this->amountPaid - $this->total;
-        session()->flash('success', 'Transaction successful!');
-        return redirect()->route('cashier.transactions.index');
+        
+        // Generate receipt data
+        $receiptData = [
+            'transaction_number' => $transaction->transaction_number,
+            'date' => $transaction->transaction_date->format('Y-m-d H:i:s'),
+            'cashier' => auth()->user()->name,
+            'items' => array_values($this->cart),
+            'subtotal' => $this->subtotal,
+            'discount' => [
+                'name' => $this->selectedDiscount ? $this->selectedDiscount->name : null,
+                'amount' => $this->discountAmount
+            ],
+            'total' => $this->total,
+            'payment' => [
+                'method' => PaymentMethod::find($this->paymentMethod)->name,
+                'amount' => $this->paidAmount,
+                'change' => $this->change
+            ]
+        ];
+        
+        // Reset POS
+        $this->resetCart();
+        
+        // Show success message and redirect to receipt
+        $this->alert('success', 'Transaction completed successfully!');
+        return redirect()->route('cashier.transactions.receipt', $transaction);
     }
-
+    
+    public function resetCart()
+    {
+        $this->cart = [];
+        $this->selectedDiscount = null;
+        $this->paymentMethod = null;
+        $this->paidAmount = 0;
+        $this->searchQuery = '';
+    }
+    
     public function render()
     {
-        return view('livewire.cashier.pos');
+        $products = Product::where('is_active', 1)
+            ->where('stock_quantity', '>', 0)
+            ->when($this->searchQuery, function($query) {
+                $query->where('name', 'like', '%'.$this->searchQuery.'%')
+                      ->orWhere('category', 'like', '%'.$this->searchQuery.'%');
+            })
+            ->orderBy('name')
+            ->paginate($this->perPage);
+
+        return view('livewire.cashier.pos', [
+            'products' => $products,
+            'subtotal' => $this->subtotal,
+            'discountAmount' => $this->discountAmount,
+            'total' => $this->total,
+            'change' => $this->change
+        ]);
     }
 }

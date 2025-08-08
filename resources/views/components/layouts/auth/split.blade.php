@@ -18,6 +18,10 @@
                     [$message, $author] = str(Illuminate\Foundation\Inspiring::quotes()->random())->explode('-');
                 @endphp
 
+                <div class="relative z-20 mt-8 flex justify-center">
+                    <img src="{{ asset('images/cat-icecream.png') }}" alt="Creamsy" class="rounded-lg shadow-lg w-3/4 h-auto">
+                </div>
+
                 <div class="relative z-20 mt-auto">
                     <blockquote class="space-y-2">
                         <p class="text-lg">&ldquo;{{ trim($message) }}&rdquo;</p>

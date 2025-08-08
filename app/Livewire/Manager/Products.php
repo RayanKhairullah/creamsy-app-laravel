@@ -40,9 +40,26 @@ class Products extends Component
                 $query->where('name', 'like', '%'.$this->search.'%')
                       ->orWhere('category', 'like', '%'.$this->search.'%');
             })
-            ->orderBy('created_at', 'desc')
+            ->orderByRaw("CASE 
+                WHEN category = 'ice_cream' THEN 1 
+                WHEN category = 'topping' THEN 2 
+                WHEN category IN ('cone', 'cup') THEN 3 
+                ELSE 4 
+            END")
+            ->orderBy('name')
             ->paginate($this->perPage);
-        return view('livewire.manager.products', compact('products'))
-            ->layout('components.layouts.manager');
+            
+        // Group products by category for the filter
+        $categories = [
+            'ice_cream' => 'Ice Cream',
+            'topping' => 'Topping',
+            'cone' => 'Cone & Cup', // Combined category
+            'cup' => 'Cone & Cup'  // Both point to the same display name
+        ];
+        
+        return view('livewire.manager.products', [
+            'products' => $products,
+            'categories' => $categories
+        ])->layout('components.layouts.manager');
     }
 }

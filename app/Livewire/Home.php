@@ -19,7 +19,12 @@ class Home extends Component
     {
         $this->icecreams = \App\Models\Product::where('category', 'ice_cream')->where('is_active', true)->get();
         $this->toppings = \App\Models\Product::where('category', 'topping')->where('is_active', true)->get();
-        $this->cones = \App\Models\Product::where('category', 'cone')->where('is_active', true)->get();
+        // Combine cone and cup categories
+        $this->cones = \App\Models\Product::whereIn('category', ['cone', 'cup'])
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+            
         return view('livewire.home', [
             'icecreams' => $this->icecreams,
             'toppings' => $this->toppings,

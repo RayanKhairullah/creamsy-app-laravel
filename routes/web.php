@@ -49,7 +49,6 @@ Route::middleware(['auth'])->group(function (): void {
     
     // Cashier routes
     Route::prefix('cashier')->as('cashier.')->middleware(['auth', 'verified'])->group(function (): void {
-        Route::get('/', \App\Livewire\Cashier\Index::class)->name('index');
         Route::get('/pos', \App\Livewire\Cashier\Pos::class)->name('pos')->middleware('can:view products');
         Route::get('/transactions', \App\Livewire\Cashier\Transactions::class)->name('transactions.index')->middleware('can:view transactions');
         Route::get('/transactions/{transaction}/receipt', \App\Livewire\Cashier\Receipt::class)->name('transactions.receipt')->middleware('can:print receipt');
