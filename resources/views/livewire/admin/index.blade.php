@@ -1,7 +1,7 @@
 <section class="container mx-auto py-6 px-4">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-1">Manager Dashboard</h1>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-1">Admin Dashboard</h1>
             <p class="text-gray-600 dark:text-gray-400">Comprehensive overview of your business performance</p>
         </div>
         <div class="flex flex-wrap gap-3">
@@ -13,6 +13,15 @@
                 :active="$timeRange === 'month'"
             >
                 This Month
+            </flux:button>
+            <flux:button 
+                wire:click="filterAll"
+                icon="bars-3" 
+                variant="outline" 
+                class="text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                :active="$timeRange === 'all'"
+            >
+                All Time
             </flux:button>
             <flux:button 
                 wire:click="refreshData"
@@ -35,19 +44,21 @@
                 <div>
                     <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Total Revenue</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">Rp {{ number_format($totalOmzet, 0, ',', '.') }}</p>
+                    @if($timeRange === 'month')
                     <div class="flex items-center mt-2">
                         @php
-                            $revenueChange = 0; // You can calculate this based on previous period
-                            $revenueChangeClass = $revenueChange >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
-                            $revenueIcon = $revenueChange >= 0 ? 'M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V17a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z' : 'M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z';
+                            $rev = round($revenueChange ?? 0);
+                            $revenueChangeClass = $rev >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+                            $revenueIcon = $rev >= 0 ? 'M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V17a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z' : 'M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z';
                         @endphp
                         <span class="{{ $revenueChangeClass }} text-sm font-medium flex items-center">
                             <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="{{ $revenueIcon }}" clip-rule="evenodd" />
                             </svg>
-                            {{ abs($revenueChange) }}% {{ $revenueChange >= 0 ? 'increase' : 'decrease' }} from last month
+                            {{ abs($rev) }}% {{ $rev >= 0 ? 'increase' : 'decrease' }} from last month
                         </span>
                     </div>
+                    @endif
                 </div>
                 <div class="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-3 flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -63,18 +74,20 @@
                 <div>
                     <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Total Transactions</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($totalTransaksi) }}</p>
+                    @if($timeRange === 'month')
                     <div class="flex items-center mt-2">
                         @php
-                            $transactionChange = 0; // You can calculate this based on previous period
-                            $transactionChangeClass = $transactionChange >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+                            $trx = round($transactionChange ?? 0);
+                            $transactionChangeClass = $trx >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
                         @endphp
                         <span class="{{ $transactionChangeClass }} text-sm font-medium flex items-center">
                             <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V17a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                             </svg>
-                            {{ abs($transactionChange) }}% {{ $transactionChange >= 0 ? 'increase' : 'decrease' }} from last month
+                            {{ abs($trx) }}% {{ $trx >= 0 ? 'increase' : 'decrease' }} from last month
                         </span>
                     </div>
+                    @endif
                 </div>
                 <div class="bg-emerald-50 dark:bg-emerald-900/30 rounded-lg p-3 flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -90,18 +103,20 @@
                 <div>
                     <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Products Sold</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($produkTerjual) }}</p>
+                    @if($timeRange === 'month')
                     <div class="flex items-center mt-2">
                         @php
-                            $productsSoldChange = 0; // You can calculate this based on previous period
-                            $productsSoldChangeClass = $productsSoldChange >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+                            $prd = round($productsSoldChange ?? 0);
+                            $productsSoldChangeClass = $prd >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
                         @endphp
                         <span class="{{ $productsSoldChangeClass }} text-sm font-medium flex items-center">
                             <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V17a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                             </svg>
-                            {{ abs($productsSoldChange) }}% {{ $productsSoldChange >= 0 ? 'increase' : 'decrease' }} from last month
+                            {{ abs($prd) }}% {{ $prd >= 0 ? 'increase' : 'decrease' }} from last month
                         </span>
                     </div>
+                    @endif
                 </div>
                 <div class="bg-amber-50 dark:bg-amber-900/30 rounded-lg p-3 flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

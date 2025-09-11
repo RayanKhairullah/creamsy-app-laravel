@@ -15,6 +15,15 @@
                 This Month
             </flux:button>
             <flux:button 
+                wire:click="filterAll"
+                icon="bars-3" 
+                variant="outline" 
+                class="text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                :active="$timeRange === 'all'"
+            >
+                All Time
+            </flux:button>
+            <flux:button 
                 wire:click="refreshData"
                 wire:loading.attr="disabled"
                 icon="arrow-path" 
@@ -37,15 +46,15 @@
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">Rp {{ number_format($totalOmzet, 0, ',', '.') }}</p>
                     <div class="flex items-center mt-2">
                         @php
-                            $revenueChange = 0; // You can calculate this based on previous period
-                            $revenueChangeClass = $revenueChange >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
-                            $revenueIcon = $revenueChange >= 0 ? 'M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V17a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z' : 'M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z';
+                            $rev = round($revenueChange ?? 0);
+                            $revenueChangeClass = $rev >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+                            $revenueIcon = $rev >= 0 ? 'M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V17a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z' : 'M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z';
                         @endphp
                         <span class="{{ $revenueChangeClass }} text-sm font-medium flex items-center">
                             <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="{{ $revenueIcon }}" clip-rule="evenodd" />
                             </svg>
-                            {{ abs($revenueChange) }}% {{ $revenueChange >= 0 ? 'increase' : 'decrease' }} from last month
+                            {{ abs($rev) }}% {{ $rev >= 0 ? 'increase' : 'decrease' }} from last month
                         </span>
                     </div>
                 </div>
@@ -65,14 +74,14 @@
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($totalTransaksi) }}</p>
                     <div class="flex items-center mt-2">
                         @php
-                            $transactionChange = 0; // You can calculate this based on previous period
-                            $transactionChangeClass = $transactionChange >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+                            $trx = round($transactionChange ?? 0);
+                            $transactionChangeClass = $trx >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
                         @endphp
                         <span class="{{ $transactionChangeClass }} text-sm font-medium flex items-center">
                             <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V17a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                             </svg>
-                            {{ abs($transactionChange) }}% {{ $transactionChange >= 0 ? 'increase' : 'decrease' }} from last month
+                            {{ abs($trx) }}% {{ $trx >= 0 ? 'increase' : 'decrease' }} from last month
                         </span>
                     </div>
                 </div>
@@ -92,14 +101,14 @@
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($produkTerjual) }}</p>
                     <div class="flex items-center mt-2">
                         @php
-                            $productsSoldChange = 0; // You can calculate this based on previous period
-                            $productsSoldChangeClass = $productsSoldChange >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+                            $prd = round($productsSoldChange ?? 0);
+                            $productsSoldChangeClass = $prd >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
                         @endphp
                         <span class="{{ $productsSoldChangeClass }} text-sm font-medium flex items-center">
                             <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V17a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                             </svg>
-                            {{ abs($productsSoldChange) }}% {{ $productsSoldChange >= 0 ? 'increase' : 'decrease' }} from last month
+                            {{ abs($prd) }}% {{ $prd >= 0 ? 'increase' : 'decrease' }} from last month
                         </span>
                     </div>
                 </div>

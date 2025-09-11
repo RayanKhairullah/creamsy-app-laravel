@@ -167,11 +167,22 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Paid Amount</label>
                                 <input 
-                                    type="number" 
-                                    wire:model.debounce.500ms="paidAmount" 
+                                    type="text"
+                                    inputmode="numeric"
+                                    wire:model.debounce.400ms="paidAmount" 
                                     class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="0"
+                                    placeholder="e.g. 100000 or 100.000"
                                 >
+                                @error('paidAmount')
+                                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                @enderror
+                                <div class="flex gap-2 mt-2">
+                                    <button type="button" wire:click="setPaidAmount({{ (int) $total }})" class="px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                        Exact ({{ number_format($total, 0, ',', '.') }})
+                                    </button>
+                                    <button type="button" wire:click="setPaidAmount(50000)" class="px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50">50.000</button>
+                                    <button type="button" wire:click="setPaidAmount(100000)" class="px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50">100.000</button>
+                                </div>
                             </div>
                         </div>
                         <!-- Discount section -->

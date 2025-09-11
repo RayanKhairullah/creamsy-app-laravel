@@ -112,21 +112,6 @@
                                 </span>
                             </span>
                         </flux:navlist.item>
-                        <flux:navlist.item 
-                            icon="chart-bar" 
-                            :href="route('manager.reports.index')" 
-                            :current="request()->routeIs('manager.reports.*')"
-                            class="group px-3 py-2.5 rounded-xl transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-700/50"
-                        >
-                            <span class="flex items-center">
-                                <span class="mr-3 transition-transform duration-200 group-hover:scale-105">Reports</span>
-                                <span class="ml-auto opacity-0 group-[.active]:opacity-100 transition-opacity">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </span>
-                            </span>
-                        </flux:navlist.item>
                     @endcan
                 </flux:navlist.group>
             @endcanany

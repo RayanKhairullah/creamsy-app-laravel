@@ -31,13 +31,6 @@
                 <label class="block text-sm font-medium mb-1">End Date <span class="text-red-500">*</span></label>
                 <input type="date" wire:model="end_date" class="form-input w-full" required>
             </div>
-            <div>
-                <label class="block text-sm font-medium mb-1">Status</label>
-                <select wire:model="is_active" class="form-input w-full">
-                    <option value="1">Active</option>
-                    <option value="0">Inactive</option>
-                </select>
-            </div>
         </div>
         <div>
             <label class="block text-sm font-medium mb-1">Description</label>

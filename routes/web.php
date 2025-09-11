@@ -44,7 +44,6 @@ Route::middleware(['auth'])->group(function (): void {
         Route::get('/discounts/create', \App\Livewire\Manager\Discounts\CreateDiscount::class)->name('discounts.create')->middleware('can:create discounts');
         Route::get('/discounts/{discount}/edit', \App\Livewire\Manager\Discounts\EditDiscount::class)->name('discounts.edit')->middleware('can:update discounts');
         Route::get('/transactions', \App\Livewire\Manager\Transactions::class)->name('transactions.index')->middleware('can:view transactions');
-        Route::get('/reports', \App\Livewire\Manager\Reports::class)->name('reports.index')->middleware('can:view transactions');
     });
     
     // Cashier routes

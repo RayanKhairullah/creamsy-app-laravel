@@ -38,10 +38,7 @@ class Pos extends Component
     {
 
             
-        $this->discounts = Discount::where('is_active', 1)
-            ->whereDate('start_date', '<=', now())
-            ->whereDate('end_date', '>=', now())
-            ->get();
+        $this->discounts = Discount::activeValid()->get();
             
         $this->paymentMethods = PaymentMethod::where('is_active', 1)->get();
     }
@@ -112,19 +109,22 @@ class Pos extends Component
         
         // If it's already a Discount model, use it directly
         if ($discountId instanceof \App\Models\Discount) {
-            $this->selectedDiscount = $discountId;
+            // Verify it's still valid (within date range only)
+            $isValid = optional($discountId->start_date)->lte(now()) &&
+                optional($discountId->end_date)->gte(now());
+            $this->selectedDiscount = $isValid ? $discountId : null;
             return;
         }
         
         // If it's a numeric ID, find the discount
         if (is_numeric($discountId)) {
-            $this->selectedDiscount = Discount::find($discountId);
+            $this->selectedDiscount = Discount::activeValid()->find($discountId);
             return;
         }
         
         // If it's a string that can be cast to int, try to find the discount
         if (is_string($discountId) && ctype_digit($discountId)) {
-            $this->selectedDiscount = Discount::find((int)$discountId);
+            $this->selectedDiscount = Discount::activeValid()->find((int)$discountId);
             return;
         }
         
@@ -172,6 +172,12 @@ class Pos extends Component
     
     public function processPayment()
     {
+        // Re-validate selected discount just before processing
+        if ($this->selectedDiscount instanceof \App\Models\Discount) {
+            $fresh = Discount::activeValid()->find($this->selectedDiscount->id);
+            $this->selectedDiscount = $fresh ?: null;
+        }
+
         $this->validate([
             'paymentMethod' => 'required|exists:payment_methods,id',
             'paidAmount' => 'required|numeric|min:'.$this->total
@@ -231,6 +237,22 @@ class Pos extends Component
         // Show success message and redirect to receipt
         $this->alert('success', 'Transaction completed successfully!');
         return redirect()->route('cashier.transactions.receipt', $transaction);
+    }
+
+    // Normalize paidAmount input like "10.000" or "10,000" to 10000
+    public function updatedPaidAmount($value)
+    {
+        if (is_string($value)) {
+            // Remove any non-digit characters
+            $normalized = preg_replace('/[^\d]/', '', $value);
+            $this->paidAmount = $normalized !== '' ? (int) $normalized : 0;
+        }
+    }
+
+    // Quick action to set paid amount
+    public function setPaidAmount($amount)
+    {
+        $this->paidAmount = (int) $amount;
     }
     
     public function resetCart()

@@ -39,7 +39,26 @@
                     <x-table.cell>{{ $discount->name }}</x-table.cell>
                     <x-table.cell>{{ ucfirst($discount->type) }}</x-table.cell>
                     <x-table.cell>{{ $discount->type === 'percentage' ? $discount->value.'%' : 'Rp '.number_format($discount->value, 0, ',', '.') }}</x-table.cell>
-                    <x-table.cell>{{ $discount->is_active ? 'Active' : 'Inactive' }}</x-table.cell>
+                    <x-table.cell>
+                        @php
+                            $now = now();
+                            $start = \Illuminate\Support\Carbon::parse($discount->start_date);
+                            $end = \Illuminate\Support\Carbon::parse($discount->end_date);
+                            if ($now->lt($start)) {
+                                $statusLabel = 'Upcoming';
+                                $statusClass = 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
+                            } elseif ($now->between($start, $end)) {
+                                $statusLabel = 'Active';
+                                $statusClass = 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
+                            } else {
+                                $statusLabel = 'Expired';
+                                $statusClass = 'bg-gray-100 text-gray-800 dark:bg-gray-700/50 dark:text-gray-200';
+                            }
+                        @endphp
+                        <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusClass }}">
+                            {{ $statusLabel }}
+                        </span>
+                    </x-table.cell>
                     <x-table.cell class="flex gap-2">
                         <flux:button href="{{ route('manager.discounts.edit', $discount) }}" icon="pencil" size="sm">
                             Edit

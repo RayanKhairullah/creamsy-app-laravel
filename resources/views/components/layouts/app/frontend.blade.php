@@ -6,7 +6,7 @@
 <body class="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
 <flux:header 
     container 
-    class="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/90 backdrop-blur-sm sticky top-0 z-50 transition-colors duration-200"
+    class="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 backdrop-blur-sm sticky top-0 z-50 transition-colors duration-200"
 >
     <div class="flex items-center justify-between w-full">
         <!-- Left section -->
@@ -57,7 +57,7 @@
                 $watch('theme', value => $flux.appearance = value);
                 $watch('$flux.appearance', value => theme = value);
             ">
-                <flux:radio.group variant="segmented" x-model="theme" class="!border-transparent !bg-transparent !p-0">
+                <flux:radio.group variant="segmented" x-model="theme" class="!border-transparent !bg-transparent !p-0 gap-1">
                     <flux:radio value="light" icon="sun" class="!bg-gray-100 dark:!bg-gray-800 !p-1.5 !px-3" />
                     <flux:radio value="dark" icon="moon" class="!bg-gray-100 dark:!bg-gray-800 !p-1.5 !px-3" />
                 </flux:radio.group>

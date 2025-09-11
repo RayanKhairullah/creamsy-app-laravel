@@ -1,6 +1,12 @@
 <section class="w-full">
     <x-page-heading>
         <x-slot:title>Transactions</x-slot:title>
+        <x-slot:buttons>
+            <button wire:click="exportXlsx" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 focus:outline-none">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+                Download XLSX
+            </button>
+        </x-slot:buttons>
     </x-page-heading>
     <div class="flex items-center justify-between w-full mb-6 gap-2">
         <flux:input wire:model.live="search" placeholder="Search transactions..." class="!w-auto" />

@@ -4,6 +4,8 @@ namespace App\Livewire\Manager;
 
 use Livewire\Component;
 use App\Models\Transaction;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\SalesReportExport;
 
 use Livewire\WithPagination;
 
@@ -26,6 +28,11 @@ class Transactions extends Component
         $this->resetPage();
     }
 
+    public function exportXlsx()
+    {
+        return Excel::download(new SalesReportExport, 'sales_report.xlsx');
+    }
+
     public function render()
     {
         $transactions = Transaction::with('cashier')
@@ -35,7 +42,7 @@ class Transactions extends Component
                         $q->where('name', 'like', '%'.$this->search.'%');
                     });
             })
-            ->orderBy('created_at', 'desc')
+            ->orderBy('transaction_date', 'desc')
             ->paginate($this->perPage);
         return view('livewire.manager.transactions', compact('transactions'))
             ->layout('components.layouts.manager');

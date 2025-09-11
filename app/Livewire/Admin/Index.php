@@ -44,6 +44,12 @@ class Index extends Component
         $this->setDateRange();
     }
 
+    public function filterAll()
+    {
+        $this->timeRange = 'all';
+        $this->setDateRange();
+    }
+
     public function refreshData()
     {
         // Just re-render the component with current filters
@@ -57,7 +63,7 @@ class Index extends Component
         
         // Apply date filter if dates are set
         if ($this->startDate && $this->endDate) {
-            $query->whereBetween('created_at', [
+            $query->whereBetween('transaction_date', [
                 Carbon::parse($this->startDate)->startOfDay(),
                 Carbon::parse($this->endDate)->endOfDay()
             ]);
@@ -67,11 +73,30 @@ class Index extends Component
         $totalOmzet = $query->sum('total_amount');
         $totalTransaksi = $query->count();
         
+        // Month-over-Month changes (only when viewing this month)
+        $revenueChange = 0;
+        $transactionChange = 0;
+        $productsSoldChange = 0;
+        if ($this->timeRange === 'month') {
+            $prevStart = now()->subMonthNoOverflow()->startOfMonth();
+            $prevEnd = now()->subMonthNoOverflow()->endOfMonth();
+
+            $prevRevenue = Transaction::whereBetween('transaction_date', [$prevStart, $prevEnd])->sum('total_amount');
+            $prevCount = Transaction::whereBetween('transaction_date', [$prevStart, $prevEnd])->count();
+
+            $prevProductsSold = TransactionItem::whereHas('transaction', function($q) use ($prevStart, $prevEnd) {
+                $q->whereBetween('transaction_date', [$prevStart, $prevEnd]);
+            })->sum('quantity');
+
+            $revenueChange = $prevRevenue > 0 ? (($totalOmzet - $prevRevenue) / $prevRevenue) * 100 : ($totalOmzet > 0 ? 100 : 0);
+            $transactionChange = $prevCount > 0 ? (($totalTransaksi - $prevCount) / $prevCount) * 100 : ($totalTransaksi > 0 ? 100 : 0);
+        }
+        
         // Get product data with the same date range
         $productQuery = TransactionItem::with('product');
         if ($this->startDate && $this->endDate) {
             $productQuery->whereHas('transaction', function($q) {
-                $q->whereBetween('created_at', [
+                $q->whereBetween('transaction_date', [
                     Carbon::parse($this->startDate)->startOfDay(),
                     Carbon::parse($this->endDate)->endOfDay()
                 ]);
@@ -95,7 +120,7 @@ class Index extends Component
             
         // Get recent transactions
         $recentTransactions = Transaction::with('cashier')
-            ->latest()
+            ->orderBy('transaction_date', 'desc')
             ->take(5)
             ->get()
             ->map(function($transaction) {
@@ -104,12 +129,20 @@ class Index extends Component
                     'invoice_number' => $transaction->transaction_number, // Using transaction_number instead of invoice_number
                     'customer' => $transaction->cashier?->name ?? 'Guest',
                     'total' => $transaction->total_amount,
-                    'date' => $transaction->created_at->format('d M Y, H:i'),
+                    'date' => \Carbon\Carbon::parse($transaction->transaction_date)->format('d M Y, H:i'),
                     'status' => $transaction->status
                 ];
             });
         
         $produkTerjual = $productQuery->sum('quantity');
+        if ($this->timeRange === 'month') {
+            $prevStart = now()->subMonthNoOverflow()->startOfMonth();
+            $prevEnd = now()->subMonthNoOverflow()->endOfMonth();
+            $prevProductsSold = TransactionItem::whereHas('transaction', function($q) use ($prevStart, $prevEnd) {
+                $q->whereBetween('transaction_date', [$prevStart, $prevEnd]);
+            })->sum('quantity');
+            $productsSoldChange = $prevProductsSold > 0 ? (($produkTerjual - $prevProductsSold) / $prevProductsSold) * 100 : ($produkTerjual > 0 ? 100 : 0);
+        }
         $produkAktif = Product::where('is_active', true)->count();
         
         try {
@@ -139,6 +172,9 @@ class Index extends Component
             'produkTerjual' => $produkTerjual,
             'produkAktif' => $produkAktif,
             'totalCustomer' => $totalCustomer,
+            'revenueChange' => $revenueChange,
+            'transactionChange' => $transactionChange,
+            'productsSoldChange' => $productsSoldChange,
         ]);
     }
 }
