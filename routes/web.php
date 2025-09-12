@@ -55,4 +55,8 @@ Route::middleware(['auth'])->group(function (): void {
 
 });
 
+// Public Self-Order routes (no login, pay at counter)
+Route::get('/order', \App\Livewire\SelfOrder\Order::class)->name('selforder.order');
+Route::get('/order/placed/{transaction}', \App\Livewire\SelfOrder\Placed::class)->name('selforder.placed');
+
 require __DIR__.'/auth.php';

@@ -4,7 +4,9 @@
             <!-- Brand Column -->
             <div class="space-y-4">
                 <div class="flex items-center">
-                    <x-app-logo class="size-8 transition-transform duration-200 hover:scale-105" href="#"></x-app-logo>
+                    <a href="{{ route('login') }}" class="flex items-center space-x-2">
+                        <x-app-logo class="size-8 transition-transform duration-200 hover:scale-105" href="#"></x-app-logo>            
+                    </a>
                 </div>
                 <p class="text-gray-600 dark:text-gray-400 max-w-xs">
                     Professional Point of Sale system designed to streamline your retail operations with elegance and efficiency.
@@ -121,11 +123,11 @@
                 
                 <div class="flex items-center space-x-4">
                     <!-- Theme Toggle -->
-                    <div x-data="{ theme: $flux.appearance }" x-init="
+                    <div class="hidden md:block" x-data="{ theme: $flux.appearance }" x-init="
                         $watch('theme', value => $flux.appearance = value);
                         $watch('$flux.appearance', value => theme = value);
                     ">
-                        <flux:radio.group variant="segmented" x-model="theme" class="!border-transparent !bg-transparent !p-0">
+                        <flux:radio.group variant="segmented" x-model="theme" class="!border-transparent !bg-transparent !p-0 gap-1">
                             <flux:radio value="light" icon="sun" class="!bg-gray-100 dark:!bg-gray-800 !p-1.5 !px-3" />
                             <flux:radio value="dark" icon="moon" class="!bg-gray-100 dark:!bg-gray-800 !p-1.5 !px-3" />
                         </flux:radio.group>

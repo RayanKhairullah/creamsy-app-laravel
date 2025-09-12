@@ -4,12 +4,11 @@
     @include('partials.head')
 </head>
 <body class="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
-<flux:header 
+<!-- <flux:header 
     container 
     class="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 backdrop-blur-sm sticky top-0 z-50 transition-colors duration-200"
 >
     <div class="flex items-center justify-between w-full">
-        <!-- Left section -->
         <div class="flex items-center gap-4">
             <flux:sidebar.toggle 
                 class="lg:hidden" 
@@ -19,12 +18,22 @@
             />
 
             <a href="{{ route('home') }}" class="flex items-center space-x-2">
-                <x-app-logo class="size-8 transition-transform duration-200 hover:scale-105" href="#"></x-app-logo>            </a>
+                <x-app-logo class="size-8 transition-transform duration-200 hover:scale-105" href="#"></x-app-logo>            
+            </a>
         </div>
 
-        <!-- Center section - Navigation -->
         <div class="hidden lg:block flex-1 mx-8">
             <flux:navbar class="justify-center">
+                <flux:navbar.item 
+                    icon="shopping-bag" 
+                    href="{{ route('selforder.order') }}" 
+                    :current="request()->routeIs('selforder.order')"
+                    class="relative group px-4 py-2.5 transition-all duration-200"
+                >
+                    <span class="relative z-10">Self Order</span>
+                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-500 rounded-full transition-all duration-300 group-hover:w-full"></span>
+                </flux:navbar.item>
+
                 @can('view products')
                     <flux:navbar.item 
                         icon="shopping-bag" 
@@ -50,9 +59,7 @@
             </flux:navbar>
         </div>
 
-        <!-- Right section -->
         <div class="flex items-center gap-4">
-            <!-- Theme Toggle -->
             <div class="hidden md:block" x-data="{ theme: $flux.appearance }" x-init="
                 $watch('theme', value => $flux.appearance = value);
                 $watch('$flux.appearance', value => theme = value);
@@ -62,22 +69,6 @@
                     <flux:radio value="dark" icon="moon" class="!bg-gray-100 dark:!bg-gray-800 !p-1.5 !px-3" />
                 </flux:radio.group>
             </div>
-
-            @if (Route::has('login'))
-                <nav class="hidden md:block">
-                    @guest
-                        <div class="flex items-center gap-2">
-                            <flux:button 
-                                href="{{ route('login') }}" 
-                                variant="outline" 
-                                class="text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                            >
-                                {{ __('global.log_in') }}
-                            </flux:button>
-                        </div>
-                    @endguest
-                </nav>
-            @endif
 
             @auth
                 @if (Session::has('admin_user_id'))
@@ -99,7 +90,6 @@
                     </div>
                 @endif
 
-                <!-- User Menu -->
                 <flux:dropdown 
                     position="bottom" 
                     align="end"
@@ -183,10 +173,10 @@
             @endauth
         </div>
     </div>
-</flux:header>
+</flux:header> -->
 
 <!-- Mobile Menu -->
-<flux:sidebar 
+<!-- <flux:sidebar 
     stashable 
     sticky 
     class="lg:hidden border-r border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800/95 transition-colors duration-200"
@@ -200,6 +190,15 @@
                 heading="Main Menu" 
                 class="px-4 font-semibold text-gray-600 dark:text-gray-400 text-sm uppercase tracking-wider"
             >
+                <flux:navlist.item 
+                    icon="shopping-bag" 
+                    href="{{ route('selforder.order') }}" 
+                    :current="request()->routeIs('selforder.order')"
+                    class="relative group px-4 py-2.5 transition-all duration-200"
+                >
+                    <span class="relative z-10">Self Order</span>
+                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-500 rounded-full transition-all duration-300 group-hover:w-full"></span>
+                </flux:navlist.item>
                 @can('view products')
                     <flux:navlist.item 
                         icon="shopping-bag" 
@@ -248,7 +247,7 @@
             </div>
         </div>
     @endguest
-</flux:sidebar>
+</flux:sidebar> -->
 
 <flux:main 
     container 

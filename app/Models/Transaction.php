@@ -10,7 +10,9 @@ class Transaction extends Model
     use HasFactory;
 
     protected $fillable = [
-        'transaction_number', 'cashier_id', 'subtotal', 'discount_amount', 'total_amount', 'payment_method', 'payment_method_id', 'paid_amount', 'change_amount', 'status', 'transaction_date', 'notes'
+        'transaction_number', 'cashier_id', 'subtotal', 'discount_amount', 'total_amount', 'payment_method', 'paid_amount', 'change_amount', 'status', 'transaction_date', 'notes',
+        // self-order fields
+        'source', 'customer_name', 'table_code'
     ];
 
     public function items()
