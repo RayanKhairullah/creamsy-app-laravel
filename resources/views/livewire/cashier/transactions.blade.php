@@ -36,6 +36,21 @@
                     <span class="text-sm text-gray-600 dark:text-gray-400 ml-1 whitespace-nowrap">
                         {{ $transactions->total() }} total
                     </span>
+
+                    <div class="hidden sm:flex items-center gap-2 ml-4">
+                        <button wire:click="exportDaily" class="inline-flex items-center px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none text-xs">
+                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+                            Daily
+                        </button>
+                        <button wire:click="exportWeekly" class="inline-flex items-center px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 focus:outline-none text-xs">
+                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+                            Weekly
+                        </button>
+                        <button wire:click="exportMonthly" class="inline-flex items-center px-3 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 focus:outline-none text-xs">
+                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+                            Monthly
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

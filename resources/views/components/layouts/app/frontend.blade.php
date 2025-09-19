@@ -4,7 +4,7 @@
     @include('partials.head')
 </head>
 <body class="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
-<!-- <flux:header 
+<flux:header 
     container 
     class="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 backdrop-blur-sm sticky top-0 z-50 transition-colors duration-200"
 >
@@ -173,7 +173,7 @@
             @endauth
         </div>
     </div>
-</flux:header> -->
+</flux:header>
 
 <!-- Mobile Menu -->
 <!-- <flux:sidebar 

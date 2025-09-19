@@ -2,6 +2,18 @@
     <x-page-heading>
         <x-slot:title>Transactions</x-slot:title>
         <x-slot:buttons>
+            <button wire:click="exportDaily" class="inline-flex items-center px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none mr-2">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+                Daily
+            </button>
+            <button wire:click="exportWeekly" class="inline-flex items-center px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 focus:outline-none mr-2">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+                Weekly
+            </button>
+            <button wire:click="exportMonthly" class="inline-flex items-center px-3 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 focus:outline-none mr-2">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+                Monthly
+            </button>
             <button wire:click="exportXlsx" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 focus:outline-none">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
                 Download XLSX
