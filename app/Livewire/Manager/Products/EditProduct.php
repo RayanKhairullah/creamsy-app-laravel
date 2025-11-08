@@ -27,7 +27,7 @@ class EditProduct extends Component
             'category' => 'required|string',
             'stock_quantity' => 'required|integer',
             'is_active' => 'required|boolean',
-            'new_image' => 'nullable|image|max:1024', // 1MB Max
+            'new_image' => 'nullable|image|max:10000', // 1MB Max
         ];
     }
 

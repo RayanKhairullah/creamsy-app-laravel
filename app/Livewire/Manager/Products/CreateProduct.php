@@ -20,7 +20,7 @@ class CreateProduct extends Component
         'price' => 'required|numeric',
         'category' => 'required|string',
         'stock_quantity' => 'required|integer',
-        'image' => 'nullable|image|max:1024', // 1MB Max
+        'image' => 'nullable|image|max:10000', // 1MB Max
     ];
 
     public function save()
